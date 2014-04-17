@@ -1,0 +1,6 @@
+*.node
+tests/
+lib-cov/
+example/
+logo.png
+coverage.html

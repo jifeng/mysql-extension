@@ -1,0 +1,23 @@
+{
+  "name": "mysql-extension",
+  "main": "./index.js",
+  "version": "0.0.1",
+  "description": "mysql extnsion",
+  "author": "继风 <wade428@163.com>",
+  "dependencies": {
+    "options-stream": "*",
+    "mysql": "*"
+  },
+  "devDependencies": {
+    "coffee-script": "1.6.3",
+    "mocha": "*",
+    "jscover": "*",
+    "expect.js": "*"
+  },
+  "engines": [
+    "node >=0.10.1"
+  ],
+  "scripts": {
+    "test": "make test"
+  }
+}

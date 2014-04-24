@@ -19,8 +19,7 @@ DB = (function(_super) {
       user: 'me',
       password: 'secret'
     }, this.args);
-    this.connection = mysql.createConnection(this.options);
-    this.connection.connect();
+    this.pool = mysql.createPool(this.options);
   }
 
   DB.prototype.query = function(params, cb) {
@@ -35,7 +34,7 @@ DB = (function(_super) {
       for (k in _ref) {
         v = _ref[k];
         if ('string' === typeof v || 'number' === typeof v) {
-          sql = sql.replace(":" + k, this.connection.escape(v));
+          sql = sql.replace(":" + k, this.pool.escape(v));
         } else if (Array.isArray(v)) {
           sql = sql.replace(":" + k, "( " + (this.connection.escape(v)) + " )");
         }
@@ -44,18 +43,23 @@ DB = (function(_super) {
     if (!sql) {
       return cb(new Error("Invalid params " + (JSON.stringify(params))));
     }
-    return this.connection.query(sql, function(err, row) {
-      if (!err) {
-        return cb(err, row);
+    return this.pool.getConnection(function(err, conn) {
+      if (err) {
+        return cb(err);
       }
-      err.sql = sql;
-      err.params = JSON.stringify(params);
-      return cb(err, row);
+      return conn.query(sql, function(err, row) {
+        conn.release();
+        if (!err) {
+          return cb(err, row);
+        }
+        err.sql = sql;
+        err.params = JSON.stringify(params);
+        return cb(err, row);
+      });
     });
   };
 
   DB.prototype.close = function(cb) {
-    this.connection.end();
     return cb();
   };
 

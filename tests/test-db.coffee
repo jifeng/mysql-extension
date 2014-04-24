@@ -10,15 +10,11 @@ DB          = require '../lib/db'
 
 describe 'db', ()->
   db = DB()
-  _query = db.connection.query
   before (done)->
-    db.connection.query = (sql, cb)->
-      process.nextTick ()->
-        cb undefined, sql
     done()
 
   after (done)->
-    db.connection.query = _query
+    # db.connection.query = _query
     db.close done
 
   it 'query sql success', (done)->
@@ -42,16 +38,35 @@ describe 'db', ()->
       e(info).to.eql('SELECT name FROM T1 WHERE id = 042129')
       done()
 
+  it 'query fail when get connection err happen', (done)->
+    sql = 'SELECT name FROM T1 WHERE id = :id'
+    params = { id: '042129' }
+    _getConnection = db.pool.getConnection
+    db.pool.getConnection = (cb)->
+      process.nextTick ()->
+        cb new Error 'get connect mock err'
+    db.query {sql: sql, params: params}, (err, info)->
+      e(err.message).to.eql('get connect mock err')
+      db.pool.getConnection = _getConnection
+      done()
+
+
   it 'query fail when err happen', (done)->
     sql = 'SELECT name FROM T1 WHERE id = :id'
     params = { id: '042129' }
-    _query = db.connection.query
-    db.connection.query = (err, cb)->
+    _getConnection = db.pool.getConnection
+    db.pool.getConnection = (cb)->
       process.nextTick ()->
-        cb new Error 'mock err'
+        cb undefined, {
+          query: (sql, cb) ->
+            process.nextTick ()->
+              cb new Error 'mock err'
+          release: ()->
+        }
+
     db.query {sql: sql, params: params}, (err, info)->
       e(err.message).to.eql('mock err')
       e(err.sql).to.eql('SELECT name FROM T1 WHERE id = 042129')
       e(err.params).to.eql('{"sql":"SELECT name FROM T1 WHERE id = :id","params":{"id":"042129"}}')
-      db.connection.query = _query
+      db.pool.getConnection = _getConnection
       done()

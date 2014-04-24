@@ -5,23 +5,38 @@
  * Author: jifeng.zjd <jifeng.zjd@taobao.com>
  */
 
+var connection = {
+  connect: function () {},
+  query: function (sql, cb) {
+    process.nextTick(function () {
+      cb(undefined, sql)
+    });
+  },
+  escape: function (id) {
+    return id;
+  },
+  end: function () {},
+  release: function () {}
+}
+
 exports.mock = function () {
   require('mysql');
   require.cache[require.resolve("mysql")].exports = {
     createConnection : function () {
-      var connection = {
-        connect: function () {},
-        query: function (sql, cb) {
+      return connection;
+    },
+    createPool: function () {
+      var pool = {
+        getConnection: function (cb) {
           process.nextTick(function () {
-            cb()
+            cb(undefined, connection)
           });
         },
         escape: function (id) {
           return id;
-        },
-        end: function () {}
+        }
       }
-      return connection;
+      return pool;
     }
   };
 }

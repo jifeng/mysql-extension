@@ -40,6 +40,7 @@ class DB extends events.EventEmitter
       return cb err if err
       conn.query sql, (err, row) ->
         conn.release() # 释放连接
+        #假如没有返回错误，直接cb
         return cb(err, row) if !err
         err.sql = sql
         err.params = JSON.stringify params

@@ -1,7 +1,7 @@
 {
   "name": "mysql-extension",
   "main": "./index.js",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "mysql extnsion",
   "author": "继风 <wade428@163.com>",
   "dependencies": {

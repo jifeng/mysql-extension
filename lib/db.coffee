@@ -33,7 +33,7 @@ class DB extends events.EventEmitter
         if 'string' is typeof v or 'number' is typeof v
           sql = sql.replace ":#{k}", @pool.escape(v)
         else if Array.isArray v
-          sql = sql.replace ":#{k}", "( #{@connection.escape(v)} )"
+          sql = sql.replace ":#{k}", "( #{@pool.escape(v)} )"
     return cb new Error("Invalid params #{JSON.stringify(params)}") if !sql
     #从连接池中获取连接
     @pool.getConnection (err, conn)->
